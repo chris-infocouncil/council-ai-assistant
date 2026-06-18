@@ -3,266 +3,413 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AI Council Assistant</title>
+  <title>Info Assist</title>
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+      --blue: #1a56a0;
+      --blue-dark: #134080;
+      --blue-light: #eef3fb;
+      --green: #2e7d32;
+      --green-light: #e8f5e9;
+      --border: #e0e0e0;
+      --bg: #f4f6f9;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #666;
+      --system-bg: #fff8e1;
+      --system-border: #ffe082;
+      --system-text: #7a5c00;
+      --error-bg: #fdecea;
+      --error-border: #f5c6cb;
+      --error-text: #c62828;
+      --toolbar-bg: #ffffff;
+      --input-bg: #ffffff;
+      --footer-bg: #ececec;
+      --qbtn-bg: #eef3fb;
+      --qbtn-border: #c0d4ee;
+    }
+
+    body.dark {
+      --blue: #4a90d9;
+      --blue-dark: #357abd;
+      --blue-light: #1e2d42;
+      --border: #3a3a3a;
+      --bg: #1a1a1a;
+      --surface: #242424;
+      --text: #e8e8e8;
+      --text-muted: #999;
+      --system-bg: #2a2500;
+      --system-border: #6b5500;
+      --system-text: #ffd54f;
+      --error-bg: #2a0a0a;
+      --error-border: #7a2020;
+      --error-text: #ff6b6b;
+      --toolbar-bg: #242424;
+      --input-bg: #2e2e2e;
+      --footer-bg: #1a1a1a;
+      --qbtn-bg: #1e2d42;
+      --qbtn-border: #2a4a7a;
+    }
+
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f5f5f5;
-      color: #1a1a1a;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       height: 100vh;
       display: flex;
       flex-direction: column;
+      transition: background 0.2s, color 0.2s;
     }
 
+    /* Header */
     .header {
-      background: #1a56a0;
+      background: var(--blue);
       color: white;
-      padding: 12px 14px;
+      padding: 10px 12px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
       flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
-    .header-icon { font-size: 20px; }
-    .header-title { font-size: 15px; font-weight: 600; }
-    .header-subtitle { font-size: 11px; opacity: 0.8; }
+    .header-logo { font-size: 19px; }
+    .header-title { font-size: 15px; font-weight: 700; letter-spacing: 0.2px; }
+    .header-sub { font-size: 10px; opacity: 0.75; margin-top: 1px; }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+    .btn-icon {
+      background: rgba(255,255,255,0.15);
+      border: none; color: white;
+      padding: 5px 7px; border-radius: 5px;
+      cursor: pointer; font-size: 13px;
+      transition: background 0.15s;
+    }
+    .btn-icon:hover { background: rgba(255,255,255,0.28); }
 
     /* Setup screen */
     #setup-screen {
-      flex: 1;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      overflow-y: auto;
+      flex: 1; padding: 20px;
+      display: flex; flex-direction: column; gap: 13px;
+      overflow-y: auto; background: var(--surface);
     }
-    #setup-screen h2 { font-size: 14px; color: #1a56a0; }
-    #setup-screen p { font-size: 12px; color: #555; line-height: 1.6; }
-    #setup-screen a { color: #1a56a0; }
-    .input-label { font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px; }
-    input[type="password"] {
-      width: 100%;
-      padding: 8px 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 13px;
+    #setup-screen h2 { font-size: 14px; color: var(--blue); }
+    #setup-screen p { font-size: 12px; color: var(--text-muted); line-height: 1.65; }
+    #setup-screen a { color: var(--blue); }
+    .field-label { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .field-input {
+      width: 100%; padding: 8px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 7px; font-size: 13px;
+      font-family: inherit;
+      background: var(--input-bg);
+      color: var(--text);
     }
-    .btn {
-      padding: 9px 14px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
+    .field-input:focus { outline: none; border-color: var(--blue); }
+    .btn-primary {
+      width: 100%; padding: 10px;
+      background: var(--blue); color: white;
+      border: none; border-radius: 7px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
     }
-    .btn-primary { background: #1a56a0; color: white; }
-    .btn-primary:hover { background: #154280; }
-    .btn-small {
-      padding: 4px 9px;
-      font-size: 10.5px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      background: #f0f0f0;
-      cursor: pointer;
-    }
-    .btn-small:hover { background: #e0e0e0; }
-    .btn-danger { background: #dc3545; color: white; border: none; }
-    .btn-danger:hover { background: #b02a37; }
+    .btn-primary:hover { background: var(--blue-dark); }
+    .setup-note { font-size: 10.5px; color: var(--text-muted); text-align: center; }
 
     /* Main screen */
     #main-screen { flex: 1; display: none; flex-direction: column; overflow: hidden; }
 
+    /* Toolbar */
     .toolbar {
-      background: #fff;
-      border-bottom: 1px solid #e0e0e0;
+      background: var(--toolbar-bg);
+      border-bottom: 1px solid var(--border);
       padding: 7px 10px;
-      display: flex;
-      gap: 5px;
-      flex-wrap: wrap;
+      display: flex; gap: 5px; flex-wrap: wrap;
       flex-shrink: 0;
     }
-    .quick-btn {
-      padding: 4px 9px;
-      font-size: 10.5px;
-      background: #eef3fb;
-      color: #1a56a0;
-      border: 1px solid #c0d4ee;
-      border-radius: 14px;
-      cursor: pointer;
+    .qbtn {
+      padding: 4px 9px; font-size: 11px;
+      background: var(--qbtn-bg);
+      color: var(--blue);
+      border: 1px solid var(--qbtn-border);
+      border-radius: 14px; cursor: pointer;
+      white-space: nowrap; font-family: inherit;
+      transition: background 0.15s;
     }
-    .quick-btn:hover { background: #dce8f8; }
+    .qbtn:hover { filter: brightness(0.93); }
 
-    #chat-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .msg {
-      max-width: 92%;
-      padding: 8px 11px;
-      border-radius: 10px;
-      font-size: 12.5px;
-      line-height: 1.55;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-    .msg-user { background: #1a56a0; color: white; align-self: flex-end; border-bottom-right-radius: 3px; }
-    .msg-ai { background: white; color: #1a1a1a; align-self: flex-start; border: 1px solid #e0e0e0; border-bottom-left-radius: 3px; }
-    .msg-system { background: #fff8e1; color: #7a5c00; align-self: center; font-size: 11px; border: 1px solid #ffe082; text-align: center; max-width: 100%; }
-    .msg-error { background: #fdecea; color: #c62828; align-self: center; font-size: 11.5px; border: 1px solid #f5c6cb; max-width: 100%; }
-
-    .msg-ai-wrap { display: flex; flex-direction: column; align-self: flex-start; max-width: 92%; }
-    .insert-btn {
-      margin-top: 5px;
+    /* Response length toggle */
+    .length-bar {
+      background: var(--toolbar-bg);
+      border-bottom: 1px solid var(--border);
       padding: 5px 10px;
-      font-size: 11px;
-      background: #e8f4e8;
-      color: #2e7d32;
-      border: 1px solid #a5d6a7;
-      border-radius: 4px;
-      cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 11px; color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .length-btns { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 5px; overflow: hidden; }
+    .len-btn {
+      padding: 3px 10px; font-size: 11px;
+      background: var(--surface); color: var(--text-muted);
+      border: none; cursor: pointer; font-family: inherit;
+      transition: background 0.15s, color 0.15s;
+    }
+    .len-btn.active { background: var(--blue); color: white; }
+    .len-btn:not(.active):hover { background: var(--bg); }
+
+    /* Chat */
+    #chat {
+      flex: 1; overflow-y: auto;
+      padding: 11px; display: flex;
+      flex-direction: column; gap: 9px;
+    }
+
+    .bubble {
+      max-width: 92%; padding: 9px 12px;
+      border-radius: 11px; font-size: 12.5px;
+      line-height: 1.6; word-break: break-word;
+      white-space: pre-wrap;
+    }
+    .bubble-user {
+      background: var(--blue); color: white;
+      align-self: flex-end; border-bottom-right-radius: 3px;
+    }
+    .bubble-ai {
+      background: var(--surface); color: var(--text);
+      align-self: flex-start; border: 1px solid var(--border);
+      border-bottom-left-radius: 3px;
+    }
+    .bubble-system {
+      background: var(--system-bg); color: var(--system-text);
+      border: 1px solid var(--system-border);
+      font-size: 11.5px; align-self: center;
+      text-align: center; max-width: 100%; border-radius: 8px;
+    }
+    .bubble-error {
+      background: var(--error-bg); color: var(--error-text);
+      border: 1px solid var(--error-border);
+      font-size: 11.5px; align-self: center;
+      max-width: 100%; border-radius: 8px;
+    }
+
+    .ai-wrap { display: flex; flex-direction: column; align-self: flex-start; max-width: 92%; gap: 5px; }
+    .insert-btn {
+      align-self: flex-start;
+      padding: 5px 11px; font-size: 11px;
+      background: var(--green-light); color: var(--green);
+      border: 1px solid #a5d6a7; border-radius: 5px;
+      cursor: pointer; font-family: inherit;
+      transition: background 0.15s;
     }
     .insert-btn:hover { background: #c8e6c9; }
+    .insert-btn:disabled { opacity: 0.5; cursor: default; }
 
-    .typing { display: flex; gap: 4px; align-items: center; padding: 8px 12px; }
-    .typing span { width: 6px; height: 6px; background: #aaa; border-radius: 50%; animation: bounce 1.2s infinite; }
+    .typing { display: flex; gap: 4px; padding: 9px 12px; align-items: center; }
+    .typing span {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #bbb; animation: tdot 1.2s infinite;
+    }
     .typing span:nth-child(2) { animation-delay: 0.2s; }
     .typing span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+    @keyframes tdot { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
 
+    /* Input area */
     .input-area {
-      background: white;
-      border-top: 1px solid #e0e0e0;
-      padding: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      flex-shrink: 0;
+      background: var(--input-bg);
+      border-top: 1px solid var(--border);
+      padding: 8px 10px; flex-shrink: 0;
+      display: flex; flex-direction: column; gap: 7px;
     }
-    .context-row { display: flex; align-items: center; gap: 6px; font-size: 10.5px; color: #555; flex-wrap: wrap; }
-    .input-row { display: flex; gap: 6px; }
+    .input-controls {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--text-muted); flex-wrap: wrap;
+    }
+    .toggle-label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+    .sm-btn {
+      padding: 3px 8px; font-size: 11px; font-family: inherit;
+      border: 1px solid var(--border); border-radius: 5px;
+      background: var(--bg); color: var(--text); cursor: pointer;
+    }
+    .sm-btn:hover { filter: brightness(0.93); }
+    .sm-btn.danger { color: var(--error-text); border-color: var(--error-border); }
+    .input-row { display: flex; gap: 7px; align-items: flex-end; }
     textarea {
-      flex: 1;
-      padding: 7px 9px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 12px;
-      font-family: inherit;
-      resize: none;
-      height: 58px;
+      flex: 1; padding: 8px 10px; font-size: 12.5px;
+      font-family: inherit; border: 1.5px solid var(--border);
+      border-radius: 7px; resize: none; height: 62px;
+      line-height: 1.5; background: var(--input-bg); color: var(--text);
+      transition: border-color 0.15s;
     }
-    textarea:focus { outline: none; border-color: #1a56a0; }
+    textarea:focus { outline: none; border-color: var(--blue); }
     .send-btn {
-      padding: 0 12px;
-      background: #1a56a0;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 16px;
+      padding: 0 13px; height: 62px;
+      background: var(--blue); color: white;
+      border: none; border-radius: 7px;
+      font-size: 18px; cursor: pointer; flex-shrink: 0;
+      transition: background 0.15s;
     }
-    .send-btn:hover { background: #154280; }
-    .send-btn:disabled { background: #aaa; cursor: not-allowed; }
+    .send-btn:hover { background: var(--blue-dark); }
+    .send-btn:disabled { background: #bbb; cursor: not-allowed; }
 
+    /* Footer */
     .footer {
-      background: #f0f0f0;
-      border-top: 1px solid #ddd;
-      padding: 4px 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 10px;
-      color: #888;
-      flex-shrink: 0;
+      background: var(--footer-bg);
+      border-top: 1px solid var(--border);
+      padding: 4px 10px; display: flex;
+      justify-content: space-between; align-items: center;
+      font-size: 10px; color: var(--text-muted); flex-shrink: 0;
     }
-    .reset-link { cursor: pointer; text-decoration: underline; display: none; }
+    .reset-link { cursor: pointer; text-decoration: underline; }
+
+    /* Confidentiality alert */
+    .conf-alert {
+      margin: 8px 10px 0;
+      background: #fff3e0; border: 1.5px solid #ff9800;
+      border-radius: 8px; padding: 10px 12px;
+      font-size: 12px; color: #7a4500; flex-shrink: 0;
+      animation: fadeIn 0.3s ease;
+    }
+    body.dark .conf-alert {
+      background: #2a1800; border-color: #cc7a00; color: #ffcc80;
+    }
+    .conf-alert-title {
+      font-weight: 700; font-size: 12.5px;
+      display: flex; align-items: center; gap: 6px; margin-bottom: 5px;
+    }
+    .conf-alert-body { line-height: 1.55; margin-bottom: 8px; }
+    .conf-alert-items {
+      background: rgba(255,255,255,0.5); border-radius: 5px;
+      padding: 6px 9px; margin-bottom: 8px;
+      font-size: 11.5px; line-height: 1.6;
+    }
+    body.dark .conf-alert-items { background: rgba(0,0,0,0.2); }
+    .conf-btn-row { display: flex; gap: 6px; }
+    .conf-btn {
+      padding: 5px 11px; font-size: 11.5px; font-family: inherit;
+      border-radius: 5px; cursor: pointer; border: none; font-weight: 600;
+    }
+    .conf-btn-yes { background: #e65100; color: white; }
+    .conf-btn-yes:hover { background: #bf360c; }
+    .conf-btn-no { background: #e0e0e0; color: #333; }
+    .conf-btn-no:hover { background: #ccc; }
+    body.dark .conf-btn-no { background: #3a3a3a; color: #ccc; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+
+    /* Scrollbar */
+    #chat::-webkit-scrollbar { width: 4px; }
+    #chat::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
   </style>
 </head>
 <body>
 
+<!-- Header -->
 <div class="header">
-  <div class="header-icon">🤖</div>
+  <div class="header-logo">💡</div>
   <div>
-    <div class="header-title">AI Council Assistant</div>
-    <div class="header-subtitle">Powered by Claude AI</div>
+    <div class="header-title">Info Assist</div>
+    <div class="header-sub">AI document assistant for Infocouncil</div>
+  </div>
+  <div class="header-right">
+    <button class="btn-icon" title="Toggle dark mode" onclick="toggleDark()">🌙</button>
+    <button class="btn-icon" title="Change API key" onclick="showSetup()" id="key-btn" style="display:none">🔑</button>
   </div>
 </div>
 
-<!-- Setup -->
+<!-- Setup screen -->
 <div id="setup-screen">
-  <h2>Welcome! Enter your API key to begin.</h2>
-  <p>This assistant uses Claude AI to help you draft council reports, recommendations, minutes, and other documents inside Word — alongside Infocouncil.</p>
-  <p>You need a free Anthropic API key.<br>
+  <h2>Welcome to Info Assist</h2>
+  <p>Your AI assistant for drafting council reports, recommendations, officer comments, and more — working alongside Infocouncil in Word.</p>
+  <p>You need a free Anthropic API key to get started.<br>
   👉 <a href="https://console.anthropic.com" target="_blank">Get one at console.anthropic.com</a><br><br>
-  Sign up → API Keys → Create Key → copy the <strong>sk-ant-...</strong> key and paste it below.</p>
+  Sign up → <strong>API Keys</strong> → <strong>Create Key</strong> → copy the <code>sk-ant-...</code> key and paste below.</p>
   <div>
-    <div class="input-label">Anthropic API Key</div>
-    <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." />
+    <div class="field-label">Anthropic API Key</div>
+    <input class="field-input" type="password" id="api-input" placeholder="sk-ant-api03-..." />
   </div>
-  <button class="btn btn-primary" onclick="saveApiKey()">Save & Start</button>
-  <p style="font-size:11px;color:#999;">Your key is stored only on this device and sent only to Anthropic's API when you make a request.</p>
+  <button class="btn-primary" onclick="saveKey()">Save & Start →</button>
+  <p class="setup-note">Stored only on this device. Sent only to Anthropic when you make a request.</p>
 </div>
 
-<!-- Main -->
+<!-- Main screen -->
 <div id="main-screen">
+
+  <!-- Quick action buttons -->
   <div class="toolbar">
-    <button class="quick-btn" onclick="quickPrompt('Draft an officer recommendation for the current agenda item')">📄 Recommendation</button>
-    <button class="quick-btn" onclick="quickPrompt('Write an executive summary for this report')">✍️ Exec Summary</button>
-    <button class="quick-btn" onclick="quickPrompt('Summarise the key points of this document')">📋 Summarise</button>
-    <button class="quick-btn" onclick="quickPrompt('Draft minutes for this agenda item')">🗒️ Minutes</button>
-    <button class="quick-btn" onclick="quickPrompt('Improve the writing quality and clarity of this content')">✨ Improve</button>
-    <button class="quick-btn" onclick="quickPrompt('Draft a background section for this report')">📑 Background</button>
+    <button class="qbtn" onclick="q('Draft an officer recommendation for this agenda item')">📄 Recommendation</button>
+    <button class="qbtn" onclick="q('Write an executive summary for this report')">✍️ Exec Summary</button>
+    <button class="qbtn" onclick="q('Draft a background section for this report')">📑 Background</button>
+    <button class="qbtn" onclick="q('Draft officer comments for this report item')">💬 Officer Comments</button>
+    <button class="qbtn" onclick="q('Rewrite and improve the writing quality and clarity of this content')">🔄 Improve Writing</button>
+    <button class="qbtn" onclick="q('Identify any missing information, gaps, or sections that should be addressed in this report')">🔍 Identify Gaps</button>
   </div>
 
-  <div id="chat-messages">
-    <div class="msg msg-system">👋 Hi! I can draft recommendations, minutes, summaries and more. Click 📖 Read Doc first to give me context, then ask away!</div>
+  <!-- Response length bar -->
+  <div class="length-bar">
+    <span>Response length:</span>
+    <div class="length-btns">
+      <button class="len-btn" id="len-brief" onclick="setLength('brief')">Brief</button>
+      <button class="len-btn active" id="len-standard" onclick="setLength('standard')">Standard</button>
+      <button class="len-btn" id="len-detailed" onclick="setLength('detailed')">Detailed</button>
+    </div>
   </div>
 
+  <!-- Confidentiality alert (shown when detected) -->
+  <div id="conf-alert" style="display:none"></div>
+
+  <!-- Chat messages -->
+  <div id="chat">
+    <div class="bubble bubble-system">
+      👋 Welcome to Info Assist! Click <strong>📖 Read Doc</strong> to load your document, then use the quick buttons above or type a request below. Click <strong>⬆ Insert</strong> to place AI text directly into your document.
+    </div>
+  </div>
+
+  <!-- Input area -->
   <div class="input-area">
-    <div class="context-row">
-      <label style="display:flex;align-items:center;gap:4px;cursor:pointer">
-        <input type="checkbox" id="include-context" checked />
+    <div class="input-controls">
+      <label class="toggle-label">
+        <input type="checkbox" id="use-context" checked />
         <span>Use doc context</span>
       </label>
-      <button class="btn-small" onclick="readDocument()">📖 Read Doc</button>
-      <button class="btn-small btn-danger" style="margin-left:auto" onclick="clearChat()">🗑️ Clear</button>
+      <button class="sm-btn" onclick="readDocument()">📖 Read Doc</button>
+      <button class="sm-btn danger" onclick="clearChat()" style="margin-left:auto">🗑️ Clear</button>
     </div>
     <div class="input-row">
-      <textarea id="user-input" placeholder="Ask me to draft a recommendation, write minutes, improve text..." onkeydown="handleKey(event)"></textarea>
+      <textarea id="user-input"
+        placeholder="Ask me to draft a recommendation, improve writing, identify gaps..."
+        onkeydown="handleKey(event)"></textarea>
       <button class="send-btn" id="send-btn" onclick="sendMessage()">➤</button>
     </div>
   </div>
 </div>
 
+<!-- Footer -->
 <div class="footer">
-  <span id="footer-status">Ready</span>
-  <span class="reset-link" id="reset-link" onclick="resetApiKey()">Change API Key</span>
+  <span id="status">Ready</span>
+  <span class="reset-link" id="reset-link" onclick="showSetup()" style="display:none">Change API Key</span>
 </div>
 
 <script>
   let history = [];
   let docContext = "";
   let apiKey = "";
+  let responseLength = "standard";
+  let darkMode = false;
 
   Office.onReady(() => {
-    apiKey = localStorage.getItem("claude_api_key") || "";
+    apiKey = localStorage.getItem("ia_key") || "";
+    darkMode = localStorage.getItem("ia_dark") === "true";
+    if (darkMode) document.body.classList.add("dark");
     if (apiKey) showMain();
   });
 
-  function saveApiKey() {
-    const k = document.getElementById("api-key-input").value.trim();
+  // ── Auth ──────────────────────────────────────────────────────────────────
+  function saveKey() {
+    const k = document.getElementById("api-input").value.trim();
     if (!k.startsWith("sk-ant-")) {
       alert("That doesn't look right — the key should start with 'sk-ant-'");
       return;
     }
-    localStorage.setItem("claude_api_key", k);
+    localStorage.setItem("ia_key", k);
     apiKey = k;
     showMain();
   }
@@ -271,46 +418,170 @@
     document.getElementById("setup-screen").style.display = "none";
     document.getElementById("main-screen").style.display = "flex";
     document.getElementById("reset-link").style.display = "inline";
+    document.getElementById("key-btn").style.display = "inline";
   }
 
-  function resetApiKey() {
-    if (!confirm("Reset your API key?")) return;
-    localStorage.removeItem("claude_api_key");
-    apiKey = "";
+  function showSetup() {
     document.getElementById("setup-screen").style.display = "flex";
     document.getElementById("main-screen").style.display = "none";
-    document.getElementById("reset-link").style.display = "none";
-    document.getElementById("api-key-input").value = "";
+    document.getElementById("api-input").value = apiKey;
   }
 
+  // ── Dark mode ─────────────────────────────────────────────────────────────
+  function toggleDark() {
+    darkMode = !darkMode;
+    document.body.classList.toggle("dark", darkMode);
+    localStorage.setItem("ia_dark", darkMode);
+  }
+
+  // ── Response length ───────────────────────────────────────────────────────
+  function setLength(len) {
+    responseLength = len;
+    ["brief","standard","detailed"].forEach(l => {
+      document.getElementById("len-" + l).classList.toggle("active", l === len);
+    });
+  }
+
+  function getLengthInstruction() {
+    if (responseLength === "brief") return "Be concise — aim for 100–200 words maximum.";
+    if (responseLength === "detailed") return "Be thorough and detailed — include all relevant considerations, sub-sections, and supporting reasoning. Aim for 400–700 words.";
+    return "Aim for a well-rounded response of 200–400 words.";
+  }
+
+  // ── Word document access ───────────────────────────────────────────────────
   async function readDocument() {
+    // Clear any previous confidentiality alert
+    const alertEl = document.getElementById("conf-alert");
+    alertEl.style.display = "none";
+    alertEl.innerHTML = "";
+
     try {
       await Word.run(async (ctx) => {
         const body = ctx.document.body;
         body.load("text");
         await ctx.sync();
-        docContext = body.text.substring(0, 3000);
-        addMsg("system", `📖 Document read (${body.text.length} chars). I'll use this as context.`);
+        const full = body.text;
+        docContext = full.substring(0, 20000);
+        const readChars = Math.min(full.length, 20000).toLocaleString();
+        const totalChars = full.length.toLocaleString();
+        const note = full.length > 20000
+          ? `📖 Document read — ${readChars} of ${totalChars} characters loaded.`
+          : `📖 Document read — ${totalChars} characters loaded. I'll use this as context.`;
+        addBubble("system", note);
         setStatus("Document loaded ✓");
       });
     } catch(e) {
-      addMsg("error", "Could not read document: " + e.message);
+      addBubble("error", "Could not read document: " + e.message);
+      return;
+    }
+
+    // Run confidentiality check after document is loaded
+    if (docContext) runConfidentialityCheck();
+  }
+
+  async function runConfidentialityCheck() {
+    setStatus("Checking confidentiality...");
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true"
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: 600,
+          system: `You are a confidentiality screening tool for Australian local government council documents.
+
+Analyse the document and determine if it contains information that may be confidential or sensitive under the Local Government Act, including:
+- Full names of private individuals (not public officials acting in their role)
+- Personal addresses or contact details of private individuals
+- Medical, financial, or legal information about individuals
+- Commercial-in-confidence information about businesses
+- Information subject to legal privilege
+- Personnel or staffing matters
+- Information about a councillor's personal interests
+- Specific details about ongoing legal proceedings
+- Any other information that councils typically consider for confidential sessions
+
+Respond ONLY in this exact JSON format with no other text:
+{
+  "isConfidential": true or false,
+  "confidence": "high" or "medium" or "low",
+  "reasons": ["reason 1", "reason 2"],
+  "examples": ["specific example from document 1", "specific example from document 2"]
+}
+
+If not confidential, return isConfidential: false with empty arrays.`,
+          messages: [{ role: "user", content: `Please screen this document for confidential information:\n\n${docContext}` }]
+        })
+      });
+
+      if (!res.ok) { setStatus("Ready"); return; }
+
+      const data = await res.json();
+      const raw = data.content[0].text.replace(/```json|```/g, "").trim();
+      const result = JSON.parse(raw);
+
+      if (result.isConfidential) {
+        showConfidentialityAlert(result);
+      }
+    } catch(e) {
+      // Silently fail — don't disrupt the user if check fails
+    }
+    setStatus("Ready");
+  }
+
+  function showConfidentialityAlert(result) {
+    const alertEl = document.getElementById("conf-alert");
+    const confidenceLabel = result.confidence === "high" ? "⚠️ Likely" : result.confidence === "medium" ? "⚠️ Possibly" : "ℹ️ May be";
+
+    const reasonsHtml = result.reasons.map(r => `• ${r}`).join("\n");
+    const examplesHtml = result.examples.length
+      ? result.examples.map(e => `• "${e}"`).join("\n")
+      : "";
+
+    alertEl.className = "conf-alert";
+    alertEl.innerHTML = `
+      <div class="conf-alert-title">🔒 ${confidenceLabel} Confidential Content Detected</div>
+      <div class="conf-alert-body">This document may contain confidential information. Consider whether it should be classified as a confidential report.</div>
+      <div class="conf-alert-items">${reasonsHtml}${examplesHtml ? "\n\nExamples found:\n" + examplesHtml : ""}</div>
+      <div class="conf-btn-row">
+        <button class="conf-btn conf-btn-yes" onclick="acknowledgeConf(true)">Mark as Confidential</button>
+        <button class="conf-btn conf-btn-no" onclick="acknowledgeConf(false)">Not Confidential</button>
+      </div>
+    `;
+    alertEl.style.display = "block";
+  }
+
+  function acknowledgeConf(isConfidential) {
+    const alertEl = document.getElementById("conf-alert");
+    if (isConfidential) {
+      alertEl.innerHTML = `<div class="conf-alert-title">🔒 Marked as Confidential</div><div class="conf-alert-body">This document has been noted as confidential. Ensure it is classified appropriately in Infocouncil before publishing.</div>`;
+      addBubble("system", "🔒 Document noted as confidential. Remember to set the appropriate confidentiality classification in Infocouncil.");
+    } else {
+      alertEl.style.display = "none";
     }
   }
 
-  async function insertText(text) {
+  async function insertText(text, btn) {
     try {
       await Word.run(async (ctx) => {
         ctx.document.getSelection().insertText(text, "Replace");
         await ctx.sync();
-        setStatus("Inserted ✓");
+        btn.textContent = "✓ Inserted!";
+        btn.disabled = true;
+        setStatus("Text inserted ✓");
       });
     } catch(e) {
-      addMsg("error", "Could not insert text: " + e.message);
+      addBubble("error", "Could not insert text: " + e.message);
     }
   }
 
-  function quickPrompt(text) {
+  // ── Messaging ──────────────────────────────────────────────────────────────
+  function q(text) {
     document.getElementById("user-input").value = text;
     sendMessage();
   }
@@ -324,18 +595,20 @@
     const text = input.value.trim();
     if (!text) return;
     input.value = "";
-    addMsg("user", text);
+    addBubble("user", text);
     document.getElementById("send-btn").disabled = true;
     setStatus("Thinking...");
 
-    let system = `You are an AI assistant helping council officers draft professional local government documents inside Microsoft Word, used alongside the Infocouncil meeting management system.
+    let system = `You are Info Assist, an AI assistant embedded in Microsoft Word helping council officers and staff draft professional local government documents within the Infocouncil meeting management system.
 
-You help with: council reports, officer recommendations, minutes, agenda items, executive summaries, background sections, officer comments, and other formal council documents.
+You help draft: council reports, officer recommendations, executive summaries, background sections, officer comments, conditions of consent, and other formal council documents.
 
-Write in clear, formal, professional language appropriate for local government. Use Australian English. Format content ready to be inserted directly into a Word document.`;
+Write in clear, formal, professional language appropriate for Australian local government. Use Australian English spelling. Format content so it can be inserted directly into a Word document. Use numbered lists for recommendations and conditions.
 
-    if (docContext && document.getElementById("include-context").checked) {
-      system += `\n\nCurrent document content (up to 3000 chars):\n---\n${docContext}\n---`;
+${getLengthInstruction()}`;
+
+    if (docContext && document.getElementById("use-context").checked) {
+      system += `\n\nCurrent document content:\n---\n${docContext}\n---\nUse this to make your responses specific and relevant to the actual document.`;
     }
 
     history.push({ role: "user", content: text });
@@ -361,19 +634,19 @@ Write in clear, formal, professional language appropriate for local government. 
       typing.remove();
 
       if (!res.ok) {
-        const err = await res.json();
-        if (res.status === 401) addMsg("error", "❌ Invalid API key. Click 'Change API Key' below.");
-        else addMsg("error", "API error: " + (err.error?.message || res.statusText));
+        const err = await res.json().catch(() => ({}));
+        if (res.status === 401) addBubble("error", "❌ Invalid API key. Click 'Change API Key' below to update it.");
+        else addBubble("error", "API error " + res.status + ": " + (err.error?.message || res.statusText));
         history.pop();
       } else {
         const data = await res.json();
         const reply = data.content[0].text;
         history.push({ role: "assistant", content: reply });
-        addMsg("ai", reply, true);
+        addAiMessage(reply);
       }
     } catch(e) {
       typing.remove();
-      addMsg("error", "Network error: " + e.message);
+      addBubble("error", "Network error: " + e.message);
       history.pop();
     }
 
@@ -381,47 +654,55 @@ Write in clear, formal, professional language appropriate for local government. 
     setStatus("Ready");
   }
 
-  function addMsg(type, text, showInsert = false) {
-    const c = document.getElementById("chat-messages");
-    if (type === "ai" && showInsert) {
-      const wrap = document.createElement("div");
-      wrap.className = "msg-ai-wrap";
-      const msg = document.createElement("div");
-      msg.className = "msg msg-ai";
-      msg.textContent = text;
-      wrap.appendChild(msg);
-      const btn = document.createElement("button");
-      btn.className = "insert-btn";
-      btn.textContent = "⬆ Insert into document at cursor";
-      btn.onclick = () => { insertText(text); btn.textContent = "✓ Inserted!"; btn.disabled = true; };
-      wrap.appendChild(btn);
-      c.appendChild(wrap);
-    } else {
-      const msg = document.createElement("div");
-      msg.className = `msg ${type === "user" ? "msg-user" : type === "system" ? "msg-system" : type === "error" ? "msg-error" : "msg-ai"}`;
-      msg.textContent = text;
-      c.appendChild(msg);
-    }
-    c.scrollTop = c.scrollHeight;
+  // ── UI helpers ─────────────────────────────────────────────────────────────
+  function addAiMessage(text) {
+    const chat = document.getElementById("chat");
+    const wrap = document.createElement("div");
+    wrap.className = "ai-wrap";
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble bubble-ai";
+    bubble.textContent = text;
+    wrap.appendChild(bubble);
+
+    const btn = document.createElement("button");
+    btn.className = "insert-btn";
+    btn.textContent = "⬆ Insert into document at cursor";
+    btn.onclick = () => insertText(text, btn);
+    wrap.appendChild(btn);
+
+    chat.appendChild(wrap);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function addBubble(type, text) {
+    const chat = document.getElementById("chat");
+    const el = document.createElement("div");
+    el.className = `bubble bubble-${type}`;
+    el.textContent = text;
+    chat.appendChild(el);
+    chat.scrollTop = chat.scrollHeight;
   }
 
   function addTyping() {
-    const c = document.getElementById("chat-messages");
+    const chat = document.getElementById("chat");
     const el = document.createElement("div");
-    el.className = "msg msg-ai";
+    el.className = "bubble bubble-ai";
     el.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
-    c.appendChild(el);
-    c.scrollTop = c.scrollHeight;
+    chat.appendChild(el);
+    chat.scrollTop = chat.scrollHeight;
     return el;
   }
 
   function clearChat() {
-    history = []; docContext = "";
-    document.getElementById("chat-messages").innerHTML = '<div class="msg msg-system">Chat cleared. Ready for a new task!</div>';
+    history = [];
+    docContext = "";
+    document.getElementById("chat").innerHTML =
+      '<div class="bubble bubble-system">Chat cleared. Ready for a new task!</div>';
     setStatus("Ready");
   }
 
-  function setStatus(t) { document.getElementById("footer-status").textContent = t; }
+  function setStatus(t) { document.getElementById("status").textContent = t; }
 </script>
 </body>
 </html>
