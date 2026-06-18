@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<OfficeApp
+  xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+  xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
+  xsi:type="TaskPaneApp">
+
+  <Id>c7d8e9f0-a1b2-3456-cdef-012345678901</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>Council AI Assistant</ProviderName>
+  <DefaultLocale>en-AU</DefaultLocale>
+  <DisplayName DefaultValue="AI Council Assistant"/>
+  <Description DefaultValue="AI assistant for drafting council documents alongside Infocouncil"/>
+  <IconUrl DefaultValue="https://YOUR-USERNAME.github.io/council-ai-assistant/icon-32.png"/>
+  <HighResolutionIconUrl DefaultValue="https://YOUR-USERNAME.github.io/council-ai-assistant/icon-64.png"/>
+  <SupportUrl DefaultValue="https://YOUR-USERNAME.github.io/council-ai-assistant"/>
+
+  <AppDomains>
+    <AppDomain>https://api.anthropic.com</AppDomain>
+  </AppDomains>
+
+  <Hosts>
+    <Host Name="Document"/>
+  </Hosts>
+
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://YOUR-USERNAME.github.io/council-ai-assistant/taskpane.html"/>
+  </DefaultSettings>
+
+  <Permissions>ReadWriteDocument</Permissions>
+
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <Hosts>
+      <Host xsi:type="Document">
+        <DesktopFormFactor>
+          <GetStarted>
+            <Title resid="GetStarted.Title"/>
+            <Description resid="GetStarted.Description"/>
+            <LearnMoreUrl resid="GetStarted.LearnMoreUrl"/>
+          </GetStarted>
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <OfficeTab id="TabHome">
+              <Group id="AIGroup">
+                <Label resid="AIGroup.Label"/>
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16x16"/>
+                  <bt:Image size="32" resid="Icon.32x32"/>
+                  <bt:Image size="80" resid="Icon.80x80"/>
+                </Icon>
+                <Control xsi:type="Button" id="AIButton">
+                  <Label resid="AIButton.Label"/>
+                  <Supertip>
+                    <Title resid="AIButton.Label"/>
+                    <Description resid="AIButton.Tooltip"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16"/>
+                    <bt:Image size="32" resid="Icon.32x32"/>
+                    <bt:Image size="80" resid="Icon.80x80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>AIAssistant</TaskpaneId>
+                    <SourceLocation resid="Taskpane.Url"/>
+                  </Action>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+    <Resources>
+      <bt:Images>
+        <bt:Image id="Icon.16x16" DefaultValue="https://YOUR-USERNAME.github.io/council-ai-assistant/icon-16.png"/>
+        <bt:Image id="Icon.32x32" DefaultValue="https://YOUR-USERNAME.github.io/council-ai-assistant/icon-32.png"/>
+        <bt:Image id="Icon.80x80" DefaultValue="https://YOUR-USERNAME.github.io/council-ai-assistant/icon-80.png"/>
+      </bt:Images>
+      <bt:Urls>
+        <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://YOUR-USERNAME.github.io/council-ai-assistant"/>
+        <bt:Url id="Taskpane.Url" DefaultValue="https://YOUR-USERNAME.github.io/council-ai-assistant/taskpane.html"/>
+      </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="GetStarted.Title" DefaultValue="AI Council Assistant"/>
+        <bt:String id="AIGroup.Label" DefaultValue="AI Assistant"/>
+        <bt:String id="AIButton.Label" DefaultValue="AI Assistant"/>
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="GetStarted.Description" DefaultValue="AI-powered drafting for council documents"/>
+        <bt:String id="AIButton.Tooltip" DefaultValue="Open the AI Council Assistant to draft and edit documents"/>
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>
