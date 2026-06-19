@@ -603,7 +603,15 @@ If not confidential, return isConfidential: false with empty arrays.`,
 
 You help draft: council reports, officer recommendations, executive summaries, background sections, officer comments, conditions of consent, and other formal council documents.
 
-Write in clear, formal, professional language appropriate for Australian local government. Use Australian English spelling. Format content so it can be inserted directly into a Word document. Use numbered lists for recommendations and conditions.
+Write in clear, formal, professional language appropriate for Australian local government. Use Australian English spelling.
+
+CRITICAL FORMATTING RULES — you must follow these without exception:
+- Never use markdown formatting of any kind. No ###, ##, **, *, --, or any other markdown symbols.
+- Never use emojis or special symbols.
+- Never add headings or section titles unless the user explicitly asks for them.
+- For recommendations and numbered items, use plain numbered lists (1. 2. 3.) only.
+- Output plain text only, exactly as it should appear when pasted into a Word document.
+- Do not add any preamble like "Here is the recommendation:" — go straight to the content.
 
 ${getLengthInstruction()}`;
 
