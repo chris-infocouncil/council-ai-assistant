@@ -64,6 +64,59 @@
       transition: background 0.2s, color 0.2s;
     }
 
+    /* Tab navigation */
+    .tab-bar {
+      display: flex; background: var(--blue-dark, #134080);
+      flex-shrink: 0;
+    }
+    .tab-btn {
+      flex: 1; padding: 7px 4px; font-size: 12px; font-family: inherit;
+      background: none; border: none; color: rgba(255,255,255,0.65);
+      cursor: pointer; border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .tab-btn.active { color: white; border-bottom-color: #f59e0b; }
+    .tab-btn:hover:not(.active) { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.08); }
+
+    /* Help screen */
+    #help-screen {
+      flex: 1; display: none; flex-direction: column; overflow: hidden;
+    }
+    .help-search-bar {
+      padding: 9px 10px; background: var(--toolbar-bg);
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
+      display: flex; gap: 6px;
+    }
+    .help-search-bar input {
+      flex: 1; padding: 7px 10px; font-size: 12.5px; font-family: inherit;
+      border: 1.5px solid var(--border); border-radius: 6px;
+      background: var(--input-bg); color: var(--text);
+    }
+    .help-search-bar input:focus { outline: none; border-color: var(--blue); }
+    .help-search-btn {
+      padding: 7px 12px; background: var(--blue); color: white;
+      border: none; border-radius: 6px; cursor: pointer; font-size: 12px;
+    }
+    .help-search-btn:hover { background: var(--blue-dark); }
+    #help-results {
+      flex: 1; overflow-y: auto; padding: 10px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .help-result {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 12px; font-size: 12px;
+      line-height: 1.6; color: var(--text);
+    }
+    .help-result-title {
+      font-weight: 700; color: var(--blue);
+      font-size: 12.5px; margin-bottom: 5px;
+    }
+    .help-placeholder {
+      text-align: center; color: var(--text-muted);
+      font-size: 12px; padding: 30px 16px; line-height: 1.7;
+    }
+    .help-typing { text-align:center; color: var(--text-muted); font-size:12px; padding: 20px; }
+
     /* Header */
     .header {
       background: var(--blue);
@@ -315,6 +368,12 @@
   </div>
 </div>
 
+<!-- Tab bar (only shown when logged in) -->
+<div class="tab-bar" id="tab-bar" style="display:none">
+  <button class="tab-btn active" id="tab-assist" onclick="switchTab('assist')">✍️ Assist</button>
+  <button class="tab-btn" id="tab-help" onclick="switchTab('help')">❓ Infocouncil Help</button>
+</div>
+
 <!-- Setup screen -->
 <div id="setup-screen">
   <h2>Welcome to Info Assist</h2>
@@ -382,6 +441,24 @@
   </div>
 </div>
 
+<!-- Help screen -->
+<div id="help-screen">
+  <div class="help-search-bar">
+    <input type="text" id="help-input" placeholder="Ask a question about Infocouncil e.g. How do I authorise a report?" onkeydown="if(event.key==='Enter') searchHelp()" />
+    <button class="help-search-btn" onclick="searchHelp()">Ask</button>
+  </div>
+  <div id="help-results">
+    <div class="help-placeholder">
+      Ask any question about using Infocouncil and I'll search the official help documentation to find the answer.<br><br>
+      Examples:<br>
+      "What does the Report Data screen do?"<br>
+      "How do I make a report confidential?"<br>
+      "How do I authorise a report?"<br>
+      "What is the Agenda Group used for?"
+    </div>
+  </div>
+</div>
+
 <!-- Footer -->
 <div class="footer">
   <span id="status">Ready</span>
@@ -402,6 +479,107 @@
     if (apiKey) showMain();
   });
 
+  // ── Tab switching ─────────────────────────────────────────────────────────
+  function switchTab(tab) {
+    document.getElementById("main-screen").style.display = tab === "assist" ? "flex" : "none";
+    document.getElementById("help-screen").style.display = tab === "help" ? "flex" : "none";
+    document.getElementById("tab-assist").classList.toggle("active", tab === "assist");
+    document.getElementById("tab-help").classList.toggle("active", tab === "help");
+  }
+
+  // ── Infocouncil Help search ────────────────────────────────────────────────
+  let helpData = null;
+
+  async function loadHelpData() {
+    if (helpData) return helpData;
+    try {
+      // Load from same GitHub Pages location as the add-in
+      const base = "https://chris-infocouncil.github.io/council-ai-assistant";
+      const res = await fetch(base + "/infocouncil-help.json");
+      helpData = await res.json();
+      return helpData;
+    } catch(e) {
+      return null;
+    }
+  }
+
+  async function searchHelp() {
+    const query = document.getElementById("help-input").value.trim();
+    if (!query) return;
+
+    const resultsEl = document.getElementById("help-results");
+    resultsEl.innerHTML = '<div class="help-typing">Searching Infocouncil help...</div>';
+
+    const data = await loadHelpData();
+    if (!data) {
+      resultsEl.innerHTML = '<div class="help-placeholder">Could not load help data. Make sure infocouncil-help.json has been uploaded to GitHub.</div>';
+      return;
+    }
+
+    // Build context from most relevant pages using simple keyword matching
+    const qWords = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+    const scored = data.map(page => {
+      const haystack = (page.title + " " + page.text).toLowerCase();
+      const score = qWords.reduce((s, w) => s + (haystack.split(w).length - 1), 0);
+      return { ...page, score };
+    }).filter(p => p.score > 0).sort((a, b) => b.score - a.score).slice(0, 8);
+
+    if (scored.length === 0) {
+      resultsEl.innerHTML = '<div class="help-placeholder">No matching help pages found. Try different keywords.</div>';
+      return;
+    }
+
+    // Send top matches to Claude to synthesise a plain-text answer
+    const context = scored.map(p => `PAGE: ${p.title}\n${p.text}`).join("\n\n---\n\n");
+
+    setStatus("Getting answer...");
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true"
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: 800,
+          system: `You are a help assistant for Infocouncil meeting management software. Answer questions using only the provided help documentation content. Be concise and practical. Do not use markdown formatting, headings, bold, or symbols. Write in plain text only. If the documentation does not cover the question, say so clearly.`,
+          messages: [{
+            role: "user",
+            content: `Question: ${query}\n\nRelevant help documentation:\n\n${context}`
+          }]
+        })
+      });
+
+      const apiData = await res.json();
+      const answer = apiData.content[0].text;
+
+      resultsEl.innerHTML = "";
+
+      // Show AI answer
+      const answerEl = document.createElement("div");
+      answerEl.className = "help-result";
+      answerEl.innerHTML = `<div class="help-result-title">Answer</div>${answer.replace(/\n/g, "<br>")}`;
+      resultsEl.appendChild(answerEl);
+
+      // Show source pages
+      const sourcesEl = document.createElement("div");
+      sourcesEl.className = "help-result";
+      sourcesEl.style.fontSize = "11px";
+      sourcesEl.style.color = "var(--text-muted)";
+      sourcesEl.innerHTML = `<div class="help-result-title" style="font-size:11px">Sources from Infocouncil Help</div>` +
+        scored.slice(0, 4).map(p => `• ${p.title}`).join("<br>");
+      resultsEl.appendChild(sourcesEl);
+
+    } catch(e) {
+      resultsEl.innerHTML = `<div class="help-placeholder">Error getting answer: ${e.message}</div>`;
+    }
+
+    setStatus("Ready");
+  }
+
   // ── Auth ──────────────────────────────────────────────────────────────────
   function saveKey() {
     const k = document.getElementById("api-input").value.trim();
@@ -417,6 +595,7 @@
   function showMain() {
     document.getElementById("setup-screen").style.display = "none";
     document.getElementById("main-screen").style.display = "flex";
+    document.getElementById("tab-bar").style.display = "flex";
     document.getElementById("reset-link").style.display = "inline";
     document.getElementById("key-btn").style.display = "inline";
   }
